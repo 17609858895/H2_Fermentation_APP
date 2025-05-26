@@ -1,18 +1,16 @@
-# H2_Fermentation_APP.py
-
 import streamlit as st
 import numpy as np
 import pandas as pd
 import joblib
 from io import BytesIO
 
-# ─── MUST be the first Streamlit call ──────────────────────────────────────────
+# ─── MUST be first ─────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Dark Fermentation H₂ Yield Predictor",
     layout="centered"
 )
 
-# ─── Custom CSS ─────────────────────────────────────────────────────────────────
+# ─── Custom CSS ────────────────────────────────────────────────────────────────
 st.markdown("""
     <style>
     .stApp {
@@ -126,18 +124,18 @@ df_result = None
 btn_col, dl_col = st.columns([1.5, 1])
 with btn_col:
     if st.button("🔍 Predict H₂ Yield"):
-        # ⚠️ 必须用 DataFrame 并确保列名与训练时一致
+        # ✅ 列名必须严格匹配训练数据
         X = pd.DataFrame([{
             "Fe": fe,
             "Ni": ni,
             "Biomass": biomass,
-            "pH": pH,
-            "COD": COD,
-            "HRT": HRT,
             "Acetate": acetate,
-            "Ethanol": ethanol,
             "Butyrate": butyrate,
-            "Acetate/Butyrate": ac_but_ratio
+            "Acetate/Butyrate": ac_but_ratio,
+            "Ethanol": ethanol,
+            "pH": pH,
+            "HRT": HRT,
+            "COD": COD
         }])
         prediction = model.predict(X)[0]
         st.success(f"✅ Predicted H₂ Yield: **{prediction:.2f} mL H₂/g**")
