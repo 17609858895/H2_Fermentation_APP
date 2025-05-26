@@ -6,7 +6,7 @@ import pandas as pd
 import joblib
 from io import BytesIO
 
-# ─── Page config ────────────────────────────────────────────────────────────────
+# ─── MUST be the first Streamlit call ──────────────────────────────────────────
 st.set_page_config(
     page_title="Dark Fermentation H₂ Yield Predictor",
     layout="centered"
@@ -18,7 +18,7 @@ st.markdown("""
     .stApp {
         max-width: 1100px;
         margin: auto;
-        background-color: #f0fdf4;
+        background-color: #eaf6ff;
         padding: 2.5rem 3rem 3.5rem 3rem;
         border-radius: 18px;
         box-shadow: 0px 0px 12px rgba(0, 100, 80, 0.06);
@@ -86,18 +86,18 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# ─── Load model ─────────────────────────────────────────────────────────────────
+# ─── Load trained pipeline ─────────────────────────────────────────────────────
 @st.cache_resource
 def load_model():
     return joblib.load("HGB_pipeline.pkl")
 
 model = load_model()
 
-# ─── Header ─────────────────────────────────────────────────────────────────────
+# ─── Header ────────────────────────────────────────────────────────────────────
 st.markdown('<div class="custom-header">💧 Dark Fermentation H₂ Yield Prediction</div>', unsafe_allow_html=True)
 st.markdown('<div class="custom-sub">Predict H₂ yield (mL H₂/g substrate) from experimental parameters</div>', unsafe_allow_html=True)
 
-# ─── Inputs: three columns ───────────────────────────────────────────────────────
+# ─── Input layout: three columns ───────────────────────────────────────────────
 col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
@@ -119,14 +119,26 @@ with col3:
     butyrate     = st.number_input("Butyrate (mM)",          0.0, 100.0, step=1.0, value=10.0)
     ac_but_ratio = st.number_input("Acetate/Butyrate ratio", 0.0, 10.0,  step=0.1, value=5.0)
 
-# ─── Predict & Download ─────────────────────────────────────────────────────────
+# ─── Predict & Export ──────────────────────────────────────────────────────────
 prediction = None
 df_result = None
 
-btn_col, dl_col = st.columns([1.5,1])
+btn_col, dl_col = st.columns([1.5, 1])
 with btn_col:
     if st.button("🔍 Predict H₂ Yield"):
-        X = np.array([[fe, ni, biomass, pH, COD, HRT, acetate, ethanol, butyrate, ac_but_ratio]])
+        # ⚠️ 必须用 DataFrame 并确保列名与训练时一致
+        X = pd.DataFrame([{
+            "Fe": fe,
+            "Ni": ni,
+            "Biomass": biomass,
+            "pH": pH,
+            "COD": COD,
+            "HRT": HRT,
+            "Acetate": acetate,
+            "Ethanol": ethanol,
+            "Butyrate": butyrate,
+            "Acetate/Butyrate": ac_but_ratio
+        }])
         prediction = model.predict(X)[0]
         st.success(f"✅ Predicted H₂ Yield: **{prediction:.2f} mL H₂/g**")
 
@@ -135,7 +147,7 @@ with btn_col:
             "pH": pH, "COD (mg/L)": COD, "HRT (h)": HRT,
             "Acetate (mM)": acetate, "Ethanol (mM)": ethanol,
             "Butyrate (mM)": butyrate, "Ac/But Ratio": ac_but_ratio,
-            "Predicted H₂ (mL/g)": round(prediction,2)
+            "Predicted H₂ (mL/g)": round(prediction, 2)
         }])
 
 with dl_col:
@@ -149,7 +161,7 @@ with dl_col:
             mime="text/csv"
         )
 
-# ─── Footer ─────────────────────────────────────────────────────────────────────
+# ─── Footer ───────────────────────────────────────────────────────────────────
 st.markdown("""
 ---
 <small style="color:#666;">
