@@ -2,32 +2,35 @@
 
 import streamlit as st
 import numpy as np
-import pandas as pd
 import joblib
+import pandas as pd
 
-# ─── Page config: must be at the top ──────────────────────────────────────────────
+# ─── 页面配置 ───────────────────────────────────────────────────────────────────
 st.set_page_config(
     page_title="Dark Fermentation H₂ Yield",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# ─── Custom CSS ────────────────────────────────────────────────────────────────────
+# ─── 自定义样式（仅修改背景为浅蓝色） ─────────────────────────────────────────────
 st.markdown("""
     <style>
     .stApp {
         max-width: 1100px;
         margin: auto;
-        background-color: #eaf6ff;
+        background-color: #eaf6ff;  /* 淡蓝色背景 */
         padding: 2.5rem 3rem 3.5rem 3rem;
         border-radius: 18px;
         box-shadow: 0px 0px 12px rgba(0, 100, 80, 0.06);
+    }
+    html, body, [class*="css"] {
         font-family: 'Segoe UI', sans-serif;
     }
+
     .custom-header {
         font-size: 2.0rem;
         font-weight: 700;
-        color: #1b4965;
+        color: #1b4332;
         text-align: center;
         margin-bottom: 0.3rem;
     }
@@ -37,38 +40,64 @@ st.markdown("""
         text-align: center;
         margin-bottom: 2rem;
     }
+
     .section-title {
         font-size: 1.3rem;
         font-weight: 600;
         margin-top: 1.5rem;
         margin-bottom: 1rem;
-        color: #1d3557;
+        color: #2d6a4f;
     }
-    .stButton>button {
+
+    input[type="number"] {
+        border-radius: 6px !important;
+        height: 38px !important;
+        font-size: 0.95rem !important;
+    }
+
+    .stButton>button, .stDownloadButton>button {
         border-radius: 8px;
-        background-color: #277da1;
-        color: white;
         font-weight: 600;
         font-size: 1rem;
         padding: 0.55rem 1.2rem;
+    }
+    .stButton>button {
+        background-color: #52b788;
+        color: white;
         border: none;
     }
     .stButton>button:hover {
-        background-color: #1b4965;
+        background-color: #40916c;
     }
-    .stMetric > div {
+    .stDownloadButton>button {
+        background-color: #ffffff;
+        color: #333;
+        border: 1px solid #ccc;
+    }
+    .stDownloadButton>button:hover {
+        background-color: #eef7f2;
+        border-color: #88cbb3;
+    }
+
+    .stSuccess {
+        background-color: #d8f3dc;
+        color: #065f46;
         padding: 1rem;
-        border-radius: 0.75rem;
-        background: rgba(39,125,161,0.1);
+        border-left: 6px solid #40916c;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.15rem;
+        margin-top: 1.5rem;
+        text-align: center;
     }
     </style>
 """, unsafe_allow_html=True)
 
-# ─── Header ────────────────────────────────────────────────────────────────────────
+# ─── 页面标题与副标题 ───────────────────────────────────────────────────────────
 st.markdown('<div class="custom-header">💧 Dark Fermentation H₂ Predictor</div>', unsafe_allow_html=True)
-st.markdown('<div class="custom-sub">Predict hydrogen yield (mL H₂/g substrate) based on experimental inputs</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-sub">Predict hydrogen yield (mL H₂/g substrate) from your input parameters</div>', unsafe_allow_html=True)
 
-# ─── Sidebar inputs ────────────────────────────────────────────────────────────────
+# ─── 侧边栏输入参数 ──────────────────────────────────────────────────────────────
 with st.sidebar:
     st.header("🔧 Experiment Parameters")
     with st.expander("Metal Catalysts & Biomass"):
@@ -88,42 +117,40 @@ with st.sidebar:
     st.markdown("---")
     predict_button = st.button("🚀 Predict H₂ Yield")
 
-# ─── Load model ────────────────────────────────────────────────────────────────────
+# ─── 加载模型 ─────────────────────────────────────────────────────────────────────
 @st.cache_resource(show_spinner=False)
 def load_model():
     return joblib.load("HGB_pipeline.pkl")
 
 model = load_model()
 
-# ─── Prediction & Display ─────────────────────────────────────────────────────────
+# ─── 预测与结果展示 ───────────────────────────────────────────────────────────────
 if predict_button:
-    # ⬅ 用 DataFrame 带列名，避免 StandardScaler 特征错配
     X = pd.DataFrame([{
-        "Fe": fe,
-        "Ni": ni,
-        "Biomass": biomass,
+        "fe": fe,
+        "ni": ni,
+        "biomass": biomass,
         "pH": pH,
-        "COD": COD,
-        "HRT": HRT,
-        "Acetate": acetate,
-        "Ethanol": ethanol,
-        "Butyrate": butyrate,
-        "Ac/But": ac_but_ratio
+        "cod": COD,
+        "hrt": HRT,
+        "acetate": acetate,
+        "ethanol": ethanol,
+        "butyrate": butyrate,
+        "acetate_butyrate": ac_but_ratio
     }])
-    y_pred = model.predict(X)[0]
 
+    y_pred = model.predict(X)[0]
     st.metric(
         label="🔬 Predicted H₂ Yield (mL H₂/g)",
         value=f"{y_pred:.2f}",
         delta=None
     )
 
-# ─── Footer ────────────────────────────────────────────────────────────────────────
+# ─── 页脚 ─────────────────────────────────────────────────────────────────────────
 st.markdown("""
 ---
 <small style="color:#666;">
-Model: HistGradientBoostingRegressor + StandardScaler  
-Data: 210 literature-sourced entries  
-Developed with ❤️ using Streamlit
+Data: 210 literature‐sourced points (see GitHub).  
+Model: HistGradientBoostingRegressor + StandardScaler.
 </small>
 """, unsafe_allow_html=True)
