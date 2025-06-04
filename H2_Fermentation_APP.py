@@ -107,7 +107,7 @@ with col1:
     st.markdown('<div class="section-title">🧪 Catalysts & Biomass</div>', unsafe_allow_html=True)
     fe      = st.number_input("Fe concentration (mg/L)",      0.0, 100.0, step=0.1, value=5.0)
     ni      = st.number_input("Ni concentration (mg/L)",      0.0, 50.0,  step=0.1, value=1.0)
-    biomass = st.number_input("Biomass (g)",       0.0, 100.0,  step=1, value=0.5)
+    biomass = st.number_input("Biomass (g)",       0.0, 100.0,  step=1.0, value=0.5)
 
 with col2:
     st.markdown('<div class="section-title">💧 Water Chemistry</div>', unsafe_allow_html=True)
