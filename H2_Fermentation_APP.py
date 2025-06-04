@@ -156,8 +156,7 @@ with dl_col:
 # ─── 页脚 ─────────────────────────────────────────────────────────────────────
 st.markdown("""
 ---
-<small style="color:#666;">
-Data: 210 literature-sourced points (see GitHub).  
+<small style="color:#666;"> 
 Model: HistGradientBoostingRegressor + StandardScaler pipeline.
 </small>
 """, unsafe_allow_html=True)
