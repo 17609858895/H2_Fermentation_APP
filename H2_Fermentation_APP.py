@@ -107,7 +107,7 @@ with col1:
     st.markdown('<div class="section-title">🧪 Catalysts & Biomass</div>', unsafe_allow_html=True)
     fe      = st.number_input("Fe concentration (mg/L)",      0.0, 100.0, step=0.1, value=5.0)
     ni      = st.number_input("Ni concentration (mg/L)",      0.0, 50.0,  step=0.1, value=1.0)
-    biomass = st.number_input("Biomass ratio (g VS/g)",       0.0, 1.0,  step=0.01, value=0.5)
+    biomass = st.number_input("Biomass (g)",       0.0, 100.0,  step=1, value=0.5)
 
 with col2:
     st.markdown('<div class="section-title">💧 Water Chemistry</div>', unsafe_allow_html=True)
@@ -117,9 +117,9 @@ with col2:
 
 with col3:
     st.markdown('<div class="section-title">⚗️ Substrate Profile</div>', unsafe_allow_html=True)
-    acetate      = st.number_input("Acetate (mM)",           0.0, 200.0, step=1.0, value=50.0)
-    ethanol      = st.number_input("Ethanol (mM)",           0.0, 100.0, step=1.0, value=20.0)
-    butyrate     = st.number_input("Butyrate (mM)",          0.0, 100.0, step=1.0, value=10.0)
+    acetate      = st.number_input("Acetate (g/L)",           0.0, 200.0, step=1.0, value=50.0)
+    ethanol      = st.number_input("Ethanol (g/L)",           0.0, 100.0, step=1.0, value=20.0)
+    butyrate     = st.number_input("Butyrate (g/L)",          0.0, 100.0, step=1.0, value=10.0)
     ac_but_ratio = st.number_input("Acetate/Butyrate ratio", 0.0, 10.0,  step=0.1, value=5.0)
 
 # ─── 预测与下载 ───────────────────────────────────────────────────────────────
