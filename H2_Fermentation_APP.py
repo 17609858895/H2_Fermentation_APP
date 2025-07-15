@@ -44,6 +44,14 @@ st.markdown("""
         margin-bottom: 1rem;
         color: #2d6a4f;
     }
+
+    /* ─── Parameter Label Styling ─────────────────────────────────────────────── */
+    .stNumberInput > label > div,
+    .stSlider > label > div {
+        color: #2d6a4f !important;
+        font-weight: 600 !important;
+    }
+
     input[type="number"] {
         border-radius: 6px !important;
         height: 38px !important;
@@ -107,7 +115,7 @@ with col1:
     st.markdown('<div class="section-title">🧪 Catalysts & Biomass</div>', unsafe_allow_html=True)
     fe      = st.number_input("Fe concentration (mg/L)",      0.0, 100.0, step=0.1, value=5.0)
     ni      = st.number_input("Ni concentration (mg/L)",      0.0, 50.0,  step=0.1, value=1.0)
-    biomass = st.number_input("Biomass (g)",       0.0, 100.0,  step=1.0, value=0.5)
+    biomass = st.number_input("Biomass (g)",                   0.0, 100.0,  step=1.0, value=0.5)
 
 with col2:
     st.markdown('<div class="section-title">💧 Water Chemistry</div>', unsafe_allow_html=True)
@@ -120,9 +128,9 @@ with col3:
     acetate      = st.number_input("Acetate (g/L)",           0.0, 200.0, step=1.0, value=50.0)
     ethanol      = st.number_input("Ethanol (g/L)",           0.0, 100.0, step=1.0, value=20.0)
     butyrate     = st.number_input("Butyrate (g/L)",          0.0, 100.0, step=1.0, value=10.0)
-    ac_but_ratio = st.number_input("Acetate/Butyrate ratio", 0.0, 10.0,  step=0.1, value=5.0)
+    ac_but_ratio = st.number_input("Acetate/Butyrate ratio",  0.0, 10.0,  step=0.1, value=5.0)
 
-# ─── 预测与下载 ───────────────────────────────────────────────────────────────
+# ─── 预测与下载 ─────────────────────────────────────────────────────────────
 prediction = None
 df_result = None
 
@@ -135,10 +143,16 @@ with btn_col:
         st.success(f"✅ Predicted H₂ Yield: **{prediction:.2f} mL H₂/g**")
 
         df_result = pd.DataFrame([{
-            "Fe (mg/L)": fe, "Ni (mg/L)": ni, "Biomass (g VS/g)": biomass,
-            "pH": pH, "COD (mg/L)": COD, "HRT (h)": HRT,
-            "Acetate (mM)": acetate, "Ethanol (mM)": ethanol,
-            "Butyrate (mM)": butyrate, "Ac/But Ratio": ac_but_ratio,
+            "Fe (mg/L)": fe, 
+            "Ni (mg/L)": ni, 
+            "Biomass (g VS/g)": biomass,
+            "pH": pH, 
+            "COD (mg/L)": COD, 
+            "HRT (h)": HRT,
+            "Acetate (mM)": acetate, 
+            "Ethanol (mM)": ethanol,
+            "Butyrate (mM)": butyrate, 
+            "Ac/But Ratio": ac_but_ratio,
             "Predicted H₂ (mL/g)": round(prediction, 2)
         }])
 
