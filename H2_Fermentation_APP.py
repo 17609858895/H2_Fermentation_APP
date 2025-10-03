@@ -117,7 +117,7 @@ feature_names = model.named_steps["scaler"].feature_names_in_
 
 # ─── 页面标题（保留 💧 图标） ────────────────────────────────────────────
 st.markdown('<div class="custom-header">💧 Dark Fermentation H₂ Yield Prediction</div>', unsafe_allow_html=True)
-st.markdown('<div class="custom-sub">Predict H₂ yield (mL H₂ g⁻¹) from experimental parameters</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-sub">Predict H₂ yield (mL H₂ g⁻¹ substrate) from experimental parameters</div>', unsafe_allow_html=True)
 
 # ─── 三栏输入（保留 🧪 💧 ⚗️ 图标） ──────────────────────────────────────
 col1, col2, col3 = st.columns(3, gap="large")
@@ -154,7 +154,7 @@ with btn_col:
         prediction = float(model.predict(X)[0])
 
         st.markdown(
-            f'<div class="result-box">Predicted H₂ yield: {prediction:.2f} mL H₂ g⁻¹ substrate</div>',
+            f'<div class="result-box">Predicted H₂ yield: {prediction:.2f} mL H₂ g⁻¹</div>',
             unsafe_allow_html=True
         )
 
@@ -191,4 +191,5 @@ st.markdown("""
 Model: HistGradientBoostingRegressor + StandardScaler pipeline.
 </div>
 """, unsafe_allow_html=True)
+
 
