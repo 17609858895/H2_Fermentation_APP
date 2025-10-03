@@ -12,67 +12,68 @@ st.set_page_config(
     layout="centered"
 )
 
-# --- Custom CSS Styling (Optimized for Readability) ---
+# --- Custom CSS Styling (Further Optimized for Readability) ---
 st.markdown("""
     <style>
     /* --- General App Styling --- */
     .stApp {
         max-width: 1100px;
         margin: auto;
-        background-color: #f0f8ff; /* Slightly softer background */
+        background-color: #f0f8ff;
         padding: 2.5rem 3rem 3.5rem 3rem;
         border-radius: 18px;
         box-shadow: 0px 4px 15px rgba(0, 80, 120, 0.08);
-        font-family: 'Segoe UI', 'Roboto', sans-serif; /* Added fallback fonts */
+        font-family: 'Segoe UI', 'Roboto', sans-serif;
     }
 
     /* --- Headers --- */
     .custom-header {
-        font-size: 2.2rem; /* Slightly larger */
+        font-size: 2.2rem;
         font-weight: 700;
-        color: #0d3b66; /* Darker, richer blue */
+        color: #0d3b66;
         text-align: center;
         margin-bottom: 0.3rem;
     }
     .custom-sub {
-        font-size: 1.15rem; /* Slightly larger */
-        color: #333; /* Darker grey for better contrast */
+        font-size: 1.15rem;
+        color: #333;
         text-align: center;
-        margin-bottom: 2.5rem; /* Increased margin */
+        margin-bottom: 2.5rem;
     }
 
     /* --- Section Titles --- */
     .section-title {
-        font-size: 1.4rem; /* Larger for clarity */
+        font-size: 1.35rem; /* 微调字号以防止换行 */
         font-weight: 600;
         margin-top: 1.5rem;
         margin-bottom: 1.2rem;
-        color: #1e6091; /* Stronger section color */
+        color: #1e6091;
         border-bottom: 2px solid #ddebf8;
         padding-bottom: 0.4rem;
+        white-space: nowrap; /* 强制标题不换行 */
     }
 
-    /* --- Parameter Label Styling --- */
+    /* --- Parameter Label Styling (FINAL ADJUSTMENT) --- */
     .stNumberInput > label > div,
     .stSlider > label > div {
-        color: #0d3b66 !important; /* High contrast label color */
+        color: #0d3b66 !important;
         font-weight: 600 !important;
-        font-size: 1.05rem !important; /* Larger label font */
+        font-size: 1.1rem !important; /* 再次增大标签字体 */
     }
 
     /* --- Input/Button Elements --- */
     input[type="number"] {
         border-radius: 6px !important;
-        height: 40px !important; /* Taller input box */
-        font-size: 1rem !important; /* Larger font inside input */
+        height: 40px !important;
+        font-size: 1rem !important;
         border: 1px solid #ccc;
     }
     .stButton>button, .stDownloadButton>button {
         border-radius: 8px;
         font-weight: 600;
-        font-size: 1.05rem; /* Larger button text */
+        font-size: 1.05rem;
         padding: 0.6rem 1.3rem;
-        width: 100%; /* Make buttons full-width in their columns */
+        width: 100%;
     }
     .stButton>button {
         background-color: #52b788;
@@ -100,15 +101,16 @@ st.markdown("""
         border-left: 6px solid #40916c;
         border-radius: 8px;
         font-weight: 600;
-        font-size: 1.2rem; /* Larger result text */
+        font-size: 1.2rem;
         margin-top: 1.5rem;
         text-align: center;
     }
     
-    /* --- Footer --- */
+    /* --- Footer (FINAL ADJUSTMENT) --- */
     .footer-text {
-        color: #4a4a4a !important; /* Much darker footer text */
-        font-size: 0.9rem !important; /* Slightly larger footer */
+        color: #333 !important; /* 深色页脚文本 */
+        font-size: 1.0rem !important; /* 显著增大页脚字体 */
+        font-weight: 500;
     }
     </style>
 """, unsafe_allow_html=True)
@@ -117,6 +119,7 @@ st.markdown("""
 # --- Model Loading ---
 @st.cache_resource
 def load_model():
+    # Make sure the model file "HGB_pipeline.pkl" is in the same directory
     return joblib.load("HGB_pipeline.pkl")
 
 model = load_model()
@@ -164,12 +167,12 @@ if 'prediction' not in st.session_state:
 if 'df_result' not in st.session_state:
     st.session_state.df_result = None
 
-# Use two columns for buttons to align them nicely
+# Use columns for button layout
 left_col, center_col, right_col = st.columns([1, 2, 1])
 
 with center_col:
     if st.button("🔍 Predict H₂ Yield"):
-        # Gather values in the correct order
+        # Gather values
         values_dict = {
             'Fe concentration (mg/L)': fe,
             'Ni concentration (mg/L)': ni,
