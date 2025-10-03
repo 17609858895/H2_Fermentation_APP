@@ -1,153 +1,231 @@
 # H2_Fermentation_APP.py
+
 import streamlit as st
 import numpy as np
 import pandas as pd
 import joblib
 from io import BytesIO
 
-# ─── 页面设置 ──────────────────────────────────────────────────────────────
-st.set_page_config(page_title="Dark Fermentation H₂ Yield Predictor",
-                   layout="centered")
+# --- Page Settings ---
+st.set_page_config(
+    page_title="Dark Fermentation H₂ Yield Predictor",
+    layout="centered"
+)
 
-# ─── 自定义 CSS（高对比、可印刷） ─────────────────────────────────────────
+# --- Custom CSS Styling (Optimized for Readability) ---
 st.markdown("""
-<style>
-/* 清爽白底，黑字，高对比，适合论文截图 */
-.stApp {
-    max-width: 1100px;
-    margin: auto;
-    background: #ffffff;
-    padding: 2rem 2rem 2.5rem 2rem;
-    border-radius: 12px;
-    box-shadow: 0 0 8px rgba(0,0,0,0.06);
-    font-family: "Segoe UI", system-ui, -apple-system, "Noto Sans", sans-serif;
-    color: #111;
-}
-/* 去掉默认顶栏/底栏，便于截图 */
-#MainMenu, header, footer {visibility: hidden;}
+    <style>
+    /* --- General App Styling --- */
+    .stApp {
+        max-width: 1100px;
+        margin: auto;
+        background-color: #f0f8ff; /* Slightly softer background */
+        padding: 2.5rem 3rem 3.5rem 3rem;
+        border-radius: 18px;
+        box-shadow: 0px 4px 15px rgba(0, 80, 120, 0.08);
+        font-family: 'Segoe UI', 'Roboto', sans-serif; /* Added fallback fonts */
+    }
 
-.custom-header{
-    font-size: 2.2rem; font-weight: 750; color:#111; text-align:center; margin-bottom:.25rem;
-}
-.custom-sub{
-    font-size: 1.05rem; color:#333; text-align:center; margin-bottom:1.4rem;
-}
-.section-title{
-    font-size: 1.15rem; font-weight:700; color:#111;
-    margin: .5rem 0 .6rem 0; letter-spacing:.2px;
-}
+    /* --- Headers --- */
+    .custom-header {
+        font-size: 2.2rem; /* Slightly larger */
+        font-weight: 700;
+        color: #0d3b66; /* Darker, richer blue */
+        text-align: center;
+        margin-bottom: 0.3rem;
+    }
+    .custom-sub {
+        font-size: 1.15rem; /* Slightly larger */
+        color: #333; /* Darker grey for better contrast */
+        text-align: center;
+        margin-bottom: 2.5rem; /* Increased margin */
+    }
 
-/* 表单标签与输入框：更大字号、更高可读性 */
-.stNumberInput label, .stSlider label { 
-    color:#111 !important; font-weight:700 !important; font-size:1rem !important;
-}
-input[type="number"]{
-    border-radius:8px !important; height:40px !important; font-size:1.05rem !important;
-}
+    /* --- Section Titles --- */
+    .section-title {
+        font-size: 1.4rem; /* Larger for clarity */
+        font-weight: 600;
+        margin-top: 1.5rem;
+        margin-bottom: 1.2rem;
+        color: #1e6091; /* Stronger section color */
+        border-bottom: 2px solid #ddebf8;
+        padding-bottom: 0.4rem;
+    }
 
-/* 按钮 */
-.stButton>button, .stDownloadButton>button{
-    border-radius:10px; font-weight:700; font-size:1rem; padding:.6rem 1.2rem;
-    border:1px solid #111;
-}
-.stButton>button{ background:#111; color:#fff; }
-.stButton>button:hover{ background:#222; }
+    /* --- Parameter Label Styling --- */
+    .stNumberInput > label > div,
+    .stSlider > label > div {
+        color: #0d3b66 !important; /* High contrast label color */
+        font-weight: 600 !important;
+        font-size: 1.05rem !important; /* Larger label font */
+    }
 
-/* 预测结果：高对比白底黑字 */
-.result-box{
-    margin-top: 1rem;
-    border: 2px solid #111; border-radius: 10px;
-    padding: .9rem 1rem; text-align: center;
-    font-size: 1.2rem; font-weight: 750; color:#111;
-}
+    /* --- Input/Button Elements --- */
+    input[type="number"] {
+        border-radius: 6px !important;
+        height: 40px !important; /* Taller input box */
+        font-size: 1rem !important; /* Larger font inside input */
+        border: 1px solid #ccc;
+    }
+    .stButton>button, .stDownloadButton>button {
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.05rem; /* Larger button text */
+        padding: 0.6rem 1.3rem;
+        width: 100%; /* Make buttons full-width in their columns */
+    }
+    .stButton>button {
+        background-color: #52b788;
+        color: white;
+        border: none;
+    }
+    .stButton>button:hover {
+        background-color: #40916c;
+    }
+    .stDownloadButton>button {
+        background-color: #ffffff;
+        color: #333;
+        border: 1px solid #ccc;
+    }
+    .stDownloadButton>button:hover {
+        background-color: #eef7f2;
+        border-color: #88cbb3;
+    }
 
-/* 表格/说明文字 */
-.small-note{ color:#444; font-size:.92rem; }
-</style>
+    /* --- Success Message --- */
+    .stSuccess {
+        background-color: #e6f9f1;
+        color: #065f46;
+        padding: 1.1rem;
+        border-left: 6px solid #40916c;
+        border-radius: 8px;
+        font-weight: 600;
+        font-size: 1.2rem; /* Larger result text */
+        margin-top: 1.5rem;
+        text-align: center;
+    }
+    
+    /* --- Footer --- */
+    .footer-text {
+        color: #4a4a4a !important; /* Much darker footer text */
+        font-size: 0.9rem !important; /* Slightly larger footer */
+    }
+    </style>
 """, unsafe_allow_html=True)
 
-# ─── 加载模型 ─────────────────────────────────────────────────────────────
+
+# --- Model Loading ---
 @st.cache_resource
 def load_model():
     return joblib.load("HGB_pipeline.pkl")
 
 model = load_model()
-feature_names = model.named_steps["scaler"].feature_names_in_
 
-# ─── 标题 ─────────────────────────────────────────────────────────────────
-st.markdown('<div class="custom-header">Dark Fermentation H₂ Yield Prediction</div>', unsafe_allow_html=True)
-st.markdown('<div class="custom-sub">Predict H₂ yield (mL H₂ g⁻¹ substrate) from experimental parameters</div>', unsafe_allow_html=True)
+# Ensure feature names are correctly ordered as during training
+try:
+    feature_names = model.named_steps["scaler"].get_feature_names_out()
+except AttributeError:
+    # Fallback for older scikit-learn versions
+    feature_names = model.named_steps["scaler"].feature_names_in_
 
-# ─── 三栏输入（更统一的单位与格式） ────────────────────────────────────────
+
+# --- Page Title ---
+st.markdown('<div class="custom-header">💧 Dark Fermentation H₂ Yield Prediction</div>', unsafe_allow_html=True)
+st.markdown('<div class="custom-sub">Predict H₂ yield (mL H₂/g substrate) from experimental parameters</div>', unsafe_allow_html=True)
+
+
+# --- Input Columns ---
 col1, col2, col3 = st.columns(3, gap="large")
 
 with col1:
-    st.markdown('<div class="section-title">Catalysts & Biomass</div>', unsafe_allow_html=True)
-    fe      = st.number_input("Fe (mg L⁻¹)", min_value=0.0, max_value=100.0, step=0.1, value=5.0, format="%.1f")
-    ni      = st.number_input("Ni (mg L⁻¹)", min_value=0.0, max_value=50.0,  step=0.1, value=1.0, format="%.1f")
-    biomass = st.number_input("Biomass (g)",  min_value=0.0, max_value=100.0, step=0.1, value=0.5, format="%.1f")
+    st.markdown('<div class="section-title">🧪 Catalysts & Biomass</div>', unsafe_allow_html=True)
+    fe      = st.number_input("Fe concentration (mg/L)", 0.0, 100.0, step=0.1, value=5.0)
+    ni      = st.number_input("Ni concentration (mg/L)", 0.0, 50.0,  step=0.1, value=1.0)
+    biomass = st.number_input("Biomass (g)",             0.0, 100.0, step=1.0, value=0.5)
 
 with col2:
-    st.markdown('<div class="section-title">Water Chemistry</div>', unsafe_allow_html=True)
-    # 用数字输入替代滑块，避免刻度小字
-    pH  = st.number_input("pH", min_value=0.0, max_value=14.0, step=0.1, value=7.0, format="%.1f")
-    COD = st.number_input("COD (mg L⁻¹)", min_value=0.0, max_value=2000.0, step=10.0, value=1000.0, format="%.0f")
-    HRT = st.number_input("HRT (h)",       min_value=0.0, max_value=72.0,   step=1.0,  value=24.0,   format="%.0f")
+    st.markdown('<div class="section-title">💧 Water Chemistry</div>', unsafe_allow_html=True)
+    pH  = st.slider("pH", 0.0, 14.0, 7.0, step=0.1)
+    COD = st.number_input("COD (mg/L)", 0.0, 2000.0, step=10.0, value=1000.0)
+    HRT = st.number_input("HRT (h)",    0.0, 72.0,   step=1.0,  value=24.0)
 
 with col3:
-    st.markdown('<div class="section-title">Substrate Profile</div>', unsafe_allow_html=True)
-    acetate      = st.number_input("Acetate (g L⁻¹)",          min_value=0.0, max_value=200.0, step=0.1, value=50.0, format="%.1f")
-    ethanol      = st.number_input("Ethanol (g L⁻¹)",          min_value=0.0, max_value=100.0, step=0.1, value=20.0, format="%.1f")
-    butyrate     = st.number_input("Butyrate (g L⁻¹)",         min_value=0.0, max_value=100.0, step=0.1, value=10.0, format="%.1f")
-    ac_but_ratio = st.number_input("Acetate/Butyrate ratio (–)", min_value=0.0, max_value=10.0,  step=0.1, value=5.0,  format="%.1f")
+    st.markdown('<div class="section-title">⚗️ Substrate Profile</div>', unsafe_allow_html=True)
+    acetate      = st.number_input("Acetate (g/L)",          0.0, 200.0, step=1.0, value=50.0)
+    ethanol      = st.number_input("Ethanol (g/L)",          0.0, 100.0, step=1.0, value=20.0)
+    butyrate     = st.number_input("Butyrate (g/L)",         0.0, 100.0, step=1.0, value=10.0)
+    ac_but_ratio = st.number_input("Acetate/Butyrate ratio", 0.0, 10.0,  step=0.1, value=5.0)
 
-# ─── 预测 ─────────────────────────────────────────────────────────────────
-prediction = None
-df_result = None
 
-left, right = st.columns([1.3, 1])
-with left:
-    if st.button("Predict H₂ Yield"):
-        values = [fe, ni, biomass, acetate, butyrate, ac_but_ratio, ethanol, pH, HRT, COD]
-        X = pd.DataFrame([values], columns=feature_names)
-        prediction = float(model.predict(X)[0])
+# --- Prediction and Download Logic ---
+# Initialize session state for prediction and dataframe
+if 'prediction' not in st.session_state:
+    st.session_state.prediction = None
+if 'df_result' not in st.session_state:
+    st.session_state.df_result = None
 
-        st.markdown(
-            f'<div class="result-box">Predicted H₂ yield: {prediction:.2f} mL H₂ g⁻¹ substrate</div>',
-            unsafe_allow_html=True
-        )
+# Use two columns for buttons to align them nicely
+left_col, center_col, right_col = st.columns([1, 2, 1])
 
-        # 结果表（单位与输入一致，便于读者核对）
-        df_result = pd.DataFrame([{
-            "Fe (mg L⁻¹)": fe,
-            "Ni (mg L⁻¹)": ni,
+with center_col:
+    if st.button("🔍 Predict H₂ Yield"):
+        # Gather values in the correct order
+        values_dict = {
+            'Fe concentration (mg/L)': fe,
+            'Ni concentration (mg/L)': ni,
+            'Biomass (g)': biomass,
+            'Acetate (g/L)': acetate,
+            'Butyrate (g/L)': butyrate,
+            'Acetate/Butyrate ratio': ac_but_ratio,
+            'Ethanol (g/L)': ethanol,
+            'pH': pH,
+            'HRT (h)': HRT,
+            'COD (mg/L)': COD
+        }
+        
+        # Create DataFrame with columns in the correct order
+        input_data = pd.DataFrame([values_dict])[feature_names]
+        
+        # Predict and store in session state
+        prediction_value = model.predict(input_data)[0]
+        st.session_state.prediction = prediction_value
+        
+        st.session_state.df_result = pd.DataFrame([{
+            "Fe (mg/L)": fe,
+            "Ni (mg/L)": ni,
             "Biomass (g)": biomass,
             "pH": pH,
-            "COD (mg L⁻¹)": COD,
+            "COD (mg/L)": COD,
             "HRT (h)": HRT,
-            "Acetate (g L⁻¹)": acetate,
-            "Ethanol (g L⁻¹)": ethanol,
-            "Butyrate (g L⁻¹)": butyrate,
-            "Ac/But ratio (–)": ac_but_ratio,
-            "Predicted H₂ (mL g⁻¹)": round(prediction, 2)
+            "Acetate (g/L)": acetate,
+            "Ethanol (g/L)": ethanol,
+            "Butyrate (g/L)": butyrate,
+            "Ac/But Ratio": ac_but_ratio,
+            "Predicted H₂ Yield (mL H₂/g)": round(prediction_value, 2)
         }])
 
-with right:
-    if prediction is not None and df_result is not None:
-        buf = BytesIO()
-        df_result.to_csv(buf, index=False)
+# Display prediction result if it exists
+if st.session_state.prediction is not None:
+    st.success(f"✅ Predicted H₂ Yield: **{st.session_state.prediction:.2f} mL H₂/g**")
+
+# Display download button if result exists
+if st.session_state.df_result is not None:
+    towrite = BytesIO()
+    st.session_state.df_result.to_csv(towrite, index=False, encoding='utf-8')
+    towrite.seek(0)
+    
+    with center_col:
         st.download_button(
-            label="Download results (CSV)",
-            data=buf.getvalue(),
+            label="📁 Download Results as CSV",
+            data=towrite,
             file_name="H2_Fermentation_Prediction.csv",
             mime="text/csv"
         )
 
-# ─── 图注式说明（缩写释义，便于论文读者） ───────────────────────────────────
+# --- Footer ---
 st.markdown("""
 ---
-<div class="small-note">
-<b>Abbreviations.</b> COD, chemical oxygen demand; HRT, hydraulic retention time.  
+<div class="footer-text">
 Model: HistGradientBoostingRegressor + StandardScaler pipeline.
 </div>
 """, unsafe_allow_html=True)
